@@ -1,4 +1,5 @@
 import com.zaxxer.hikari.HikariConfig
+import jooq.generated.tables.pojos.Card
 import org.jooq.DSLContext
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL
@@ -16,6 +17,9 @@ import javax.sql.DataSource
 
 import static ratpack.groovy.Groovy.ratpack
 import static ratpack.jackson.Jackson.json
+import static ratpack.jackson.Jackson.jsonNode
+
+import static jooq.generated.Tables.*;
 
 final Logger log = LoggerFactory.getLogger(this.class)
 
@@ -69,18 +73,71 @@ ratpack {
                     }
                 }
             }
-        }
 
-        prefix('test') {
-            get('poker') {
-                new File('ui/app/images/cards').eachFile {
-                    println it.name
-                    println 'images/cards/' + it.name
+            path('cards') {
+                byMethod {
+                    get {
+                        DataSource dataSource = registry.get(DataSource.class)
+                        DSLContext context = DSL.using(dataSource, SQLDialect.POSTGRES)
+
+                        List<Card> cards = context.selectFrom(CARD)
+                                    .orderBy(CARD.RANK.asc())
+                                    .fetch()
+                                    .into(Card.class)
+
+                        assert cards.size() == 52
+
+                        render json(cards)
+                    }
                 }
-
-                render 'test'
             }
         }
+
+        // code to initialize the cards table in the database
+        /*
+        prefix('init/data') {
+            get('poker') {
+                new File('ui/app/images/cards').eachFile {
+                    String name = it.name - '.png'
+                    String imageSrc = 'images/cards/' + it.name
+
+                    def card = name.split('_of_')
+
+                    String rankStr = card[0]
+                    String suit = card[1]
+
+                    Map ranks = [
+                            '2' : 2,
+                            '3' : 3,
+                            '4' : 4,
+                            '5' : 5,
+                            '6' : 6,
+                            '7' : 7,
+                            '8' : 8,
+                            '9' : 9,
+                            '10': 10,
+                            'jack' : 11,
+                            'queen' : 12,
+                            'king' : 13,
+                            'ace' : 14
+                    ]
+
+//                    DataSource dataSource = registry.get(DataSource.class)
+//                    DSLContext context = DSL.using(dataSource, SQLDialect.POSTGRES)
+//                    log.info("inserting: $name")
+//                    context.insertInto(CARD)
+//                            .set(CARD.NAME, name)
+//                            .set(CARD.IMAGE_SRC, imageSrc)
+//                            .set(CARD.RANK_STR, rankStr)
+//                            .set(CARD.RANK, ranks[rankStr])
+//                            .set(CARD.SUIT, suit)
+//                            .execute()
+                }
+
+                render 'init/data/poker'
+            }
+        }
+        */
 
         files {
             dir 'dist'

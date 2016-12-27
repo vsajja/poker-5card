@@ -16,9 +16,21 @@ angular.module('pokerApp')
     ];
 
     var poker = Restangular.all('poker');
+    var cards = Restangular.all('cards');
 
-    // This will query /poker and return a promise.
     poker.customGET().then(function (poker) {
       $scope.poker = poker;
     });
+
+    cards.customGET().then(function (cards) {
+      $scope.cards = cards;
+    });
+
+    $scope.handA = [];
+    $scope.handB = [];
+
+    $scope.addCard = function (card) {
+      $scope.handA.push(card);
+      console.log($scope.handA);
+    };
   }]);
