@@ -65,10 +65,6 @@ ratpack {
                     get {
                         DataSource dataSource = registry.get(DataSource.class)
                         DSLContext context = DSL.using(dataSource, SQLDialect.POSTGRES)
-
-//                        def knots = context.selectCount().from(KNOT).asField('knots')
-//                        def result = context.select(knots).fetchOneMap()
-
                         render json([])
                     }
                 }
@@ -81,13 +77,26 @@ ratpack {
                         DSLContext context = DSL.using(dataSource, SQLDialect.POSTGRES)
 
                         List<Card> cards = context.selectFrom(CARD)
-                                    .orderBy(CARD.RANK.asc())
-                                    .fetch()
-                                    .into(Card.class)
+                                .orderBy(CARD.RANK.asc())
+                                .fetch()
+                                .into(Card.class)
 
                         assert cards.size() == 52
 
                         render json(cards)
+                    }
+                }
+            }
+
+            path('hands') {
+                byMethod {
+                    post {
+                        parse(jsonNode()).map { params ->
+                            log.info(params.toString())
+                        }.then {
+                            println "then"
+                            render "then"
+                        }
                     }
                 }
             }

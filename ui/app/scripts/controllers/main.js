@@ -21,7 +21,6 @@ angular.module('pokerApp')
     poker.customGET().then(function (poker) {
       $scope.poker = poker;
     });
-
     cards.customGET().then(function (cards) {
       $scope.cards = cards;
     });
@@ -29,8 +28,49 @@ angular.module('pokerApp')
     $scope.handA = [];
     $scope.handB = [];
 
+    // select handA by default
+    $scope.selectedHand = $scope.handA;
+    $scope.handAClass = 'selected';
+
+    $scope.selectHand = function (hand) {
+      $scope.selectedHand = hand;
+
+      // toggle border to selected hand
+      if (hand === $scope.handA) {
+        $scope.handAClass = 'selected';
+        $scope.handBClass = '';
+      }
+      else if (hand === $scope.handB) {
+        $scope.handBClass = 'selected';
+        $scope.handAClass = '';
+      }
+    };
+
     $scope.addCard = function (card) {
-      $scope.handA.push(card);
-      console.log($scope.handA);
+      var hand = $scope.selectedHand;
+      if (hand.length < 5) {
+        // check for duplicates before pushing
+        if (hand.indexOf(card) === -1) {
+          hand.push(card);
+        }
+        else {
+          window.alert('Unable add duplicate card to hand: ' + card.rankStr + ' of ' + card.suit);
+        }
+      }
+    };
+
+    $scope.removeCard = function (hand, card) {
+      var index = hand.indexOf(card);
+      if (index > -1) {
+        hand.splice(index, 1);
+      }
+    };
+
+    $scope.compareHands = function(handA, handB) {
+      $scope.hands = [handA, handB];
+
+      Restangular.all('hands').post($scope.hands).then(function (result) {
+        $scope.result = result;
+      });
     };
   }]);

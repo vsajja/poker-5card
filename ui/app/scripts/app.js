@@ -17,9 +17,7 @@ angular
     'ngSanitize',
     'ngTouch',
     'ui.bootstrap',
-    'smart-table',
-    'restangular',
-    'xeditable'
+    'restangular'
   ])
   .config(function ($routeProvider, $compileProvider, RestangularProvider) {
     $routeProvider
