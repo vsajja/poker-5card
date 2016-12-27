@@ -1,4 +1,5 @@
 import com.zaxxer.hikari.HikariConfig
+import groovy.json.JsonSlurper
 import jooq.generated.tables.pojos.Card
 import org.jooq.DSLContext
 import org.jooq.SQLDialect
@@ -60,16 +61,6 @@ ratpack {
                 next()
             }
 
-            path('poker') {
-                byMethod {
-                    get {
-                        DataSource dataSource = registry.get(DataSource.class)
-                        DSLContext context = DSL.using(dataSource, SQLDialect.POSTGRES)
-                        render json([])
-                    }
-                }
-            }
-
             path('cards') {
                 byMethod {
                     get {
@@ -92,7 +83,34 @@ ratpack {
                 byMethod {
                     post {
                         parse(jsonNode()).map { params ->
-                            log.info(params.toString())
+                            List<Card> cardsA = []
+                            List<Card> cardsB = []
+
+                            JsonSlurper slurper = new JsonSlurper()
+
+                            params[0].each {
+                                def cardObj = slurper.parseText(it.toString())
+                                def card = new Card(cardObj.cardId, cardObj.name, cardObj.rank, cardObj.rankStr,
+                                        cardObj.suit, cardObj.imageSrc)
+                                cardsA.add(card)
+                            }
+
+                            params[1].each {
+                                def cardObj = slurper.parseText(it.toString())
+                                def card = new Card(cardObj.cardId, cardObj.name, cardObj.rank, cardObj.rankStr,
+                                        cardObj.suit, cardObj.imageSrc)
+
+                                cardsB.add(card)
+                            }
+
+                            log.info(cardsA.toString())
+                            log.info(cardsB.toString())
+
+                            Hand handA = new Hand(cardsA)
+                            Hand handB = new Hand(cardsB)
+
+                            log.info(handA.handType.ordinal().toString())
+                            log.info(handB.handType.ordinal().toString())
                         }.then {
                             println "then"
                             render "then"
@@ -151,5 +169,45 @@ ratpack {
         files {
             dir 'dist'
         }
+    }
+}
+
+public enum HandType {
+    HIGH_CARD,
+    PAIR,
+    TWO_PAIR,
+    THREE_OF_A_KIND,
+    STRAIGHT,
+    FLUSH,
+    FULL_HOUSE,
+    FOUR_OF_A_KIND,
+    STRAIGHT_FLUSH
+}
+
+class Hand {
+    List<Card> cards = []
+    HandType handType
+
+    public Hand(List<Card> cards) {
+        this.cards = cards
+        this.handType = evaluate()
+    }
+
+    HandType evaluate() {
+        return HandType.STRAIGHT_FLUSH
+    }
+
+    public boolean isStraight() {
+
+    }
+
+    public boolean isFlush() {
+        Map suits = cards.groupBy { Card card -> card.suit }
+        return suits.findAll { k, v -> v.size() == 5 }.size() == 1
+    }
+
+    public boolean isFourOfAKind() {
+        Map ranks = cards.groupBy { Card card -> card.rank }
+        return ranks.findAll { k, v -> v.size() == 4 }.size() == 1
     }
 }

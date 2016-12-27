@@ -15,12 +15,7 @@ angular.module('pokerApp')
       'Karma'
     ];
 
-    var poker = Restangular.all('poker');
     var cards = Restangular.all('cards');
-
-    poker.customGET().then(function (poker) {
-      $scope.poker = poker;
-    });
     cards.customGET().then(function (cards) {
       $scope.cards = cards;
     });
@@ -67,7 +62,9 @@ angular.module('pokerApp')
     };
 
     $scope.compareHands = function(handA, handB) {
-      $scope.hands = [handA, handB];
+      $scope.hands = [];
+      $scope.hands.push(handA);
+      $scope.hands.push(handB);
 
       Restangular.all('hands').post($scope.hands).then(function (result) {
         $scope.result = result;
