@@ -4,6 +4,7 @@ import jooq.generated.tables.pojos.Card
 import org.jooq.DSLContext
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL
+import org.poker.Hand
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import ratpack.config.ConfigData
@@ -71,9 +72,6 @@ ratpack {
                                 .orderBy(CARD.RANK.asc())
                                 .fetch()
                                 .into(Card.class)
-
-                        assert cards.size() == 52
-
                         render json(cards)
                     }
                 }
@@ -83,34 +81,12 @@ ratpack {
                 byMethod {
                     post {
                         parse(jsonNode()).map { params ->
-                            List<Card> cardsA = []
-                            List<Card> cardsB = []
-
-                            JsonSlurper slurper = new JsonSlurper()
-
-                            params[0].each {
-                                def cardObj = slurper.parseText(it.toString())
-                                def card = new Card(cardObj.cardId, cardObj.name, cardObj.rank, cardObj.rankStr,
-                                        cardObj.suit, cardObj.imageSrc)
-                                cardsA.add(card)
-                            }
-
-                            params[1].each {
-                                def cardObj = slurper.parseText(it.toString())
-                                def card = new Card(cardObj.cardId, cardObj.name, cardObj.rank, cardObj.rankStr,
-                                        cardObj.suit, cardObj.imageSrc)
-
-                                cardsB.add(card)
-                            }
-
-                            log.info(cardsA.toString())
-                            log.info(cardsB.toString())
+                            List<Card> cardsA = getCards(params[0])
+                            List<Card> cardsB = getCards(params[1])
 
                             Hand handA = new Hand(cardsA)
                             Hand handB = new Hand(cardsB)
 
-                            log.info(handA.handType.ordinal().toString())
-                            log.info(handB.handType.ordinal().toString())
                         }.then {
                             println "then"
                             render "then"
@@ -120,94 +96,21 @@ ratpack {
             }
         }
 
-        // code to initialize the cards table in the database
-        /*
-        prefix('init/data') {
-            get('poker') {
-                new File('ui/app/images/cards').eachFile {
-                    String name = it.name - '.png'
-                    String imageSrc = 'images/cards/' + it.name
-
-                    def card = name.split('_of_')
-
-                    String rankStr = card[0]
-                    String suit = card[1]
-
-                    Map ranks = [
-                            '2' : 2,
-                            '3' : 3,
-                            '4' : 4,
-                            '5' : 5,
-                            '6' : 6,
-                            '7' : 7,
-                            '8' : 8,
-                            '9' : 9,
-                            '10': 10,
-                            'jack' : 11,
-                            'queen' : 12,
-                            'king' : 13,
-                            'ace' : 14
-                    ]
-
-//                    DataSource dataSource = registry.get(DataSource.class)
-//                    DSLContext context = DSL.using(dataSource, SQLDialect.POSTGRES)
-//                    log.info("inserting: $name")
-//                    context.insertInto(CARD)
-//                            .set(CARD.NAME, name)
-//                            .set(CARD.IMAGE_SRC, imageSrc)
-//                            .set(CARD.RANK_STR, rankStr)
-//                            .set(CARD.RANK, ranks[rankStr])
-//                            .set(CARD.SUIT, suit)
-//                            .execute()
-                }
-
-                render 'init/data/poker'
-            }
-        }
-        */
-
         files {
             dir 'dist'
         }
     }
 }
 
-public enum HandType {
-    HIGH_CARD,
-    PAIR,
-    TWO_PAIR,
-    THREE_OF_A_KIND,
-    STRAIGHT,
-    FLUSH,
-    FULL_HOUSE,
-    FOUR_OF_A_KIND,
-    STRAIGHT_FLUSH
-}
-
-class Hand {
+def getCards(cardList) {
     List<Card> cards = []
-    HandType handType
-
-    public Hand(List<Card> cards) {
-        this.cards = cards
-        this.handType = evaluate()
+    JsonSlurper slurper = new JsonSlurper()
+    if (cardList) {
+        cardList.each {
+            def cardObj = slurper.parseText(it.toString())
+            def card = new Card(cardObj.cardId, cardObj.name, cardObj.rank, cardObj.rankStr, cardObj.suit, cardObj.imageSrc)
+            cards.add(card)
+        }
     }
-
-    HandType evaluate() {
-        return HandType.STRAIGHT_FLUSH
-    }
-
-    public boolean isStraight() {
-
-    }
-
-    public boolean isFlush() {
-        Map suits = cards.groupBy { Card card -> card.suit }
-        return suits.findAll { k, v -> v.size() == 5 }.size() == 1
-    }
-
-    public boolean isFourOfAKind() {
-        Map ranks = cards.groupBy { Card card -> card.rank }
-        return ranks.findAll { k, v -> v.size() == 4 }.size() == 1
-    }
+    return cards
 }
