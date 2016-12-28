@@ -2,7 +2,15 @@ package org.poker
 
 import jooq.generated.tables.pojos.Card
 
-class Hand {
+/**
+ * This class represents a standard 5-card poker hand.
+ *
+ * The list of possible poker hands and their order can be found here:
+ * http://en.wikipedia.org/wiki/List_of_poker_hands
+ *
+ * @author vsajja
+ */
+public class Hand {
     public static final int REQUIRED_CARDS_PER_HAND = 5
 
     List<Card> cards = []
@@ -16,14 +24,38 @@ class Hand {
 
         assert cards.size() == REQUIRED_CARDS_PER_HAND
 
-        this.handType = evaluate()
+        this.handType = getHandType()
     }
 
-    HandType evaluate() {
+    protected HandType getHandType() {
         ranks = cards.groupBy { Card card -> card.rank }
         suits = cards.groupBy { Card card -> card.suit }
 
-        return HandType.STRAIGHT_FLUSH
+        if(isStraightFlush()) {
+            return HandType.STRAIGHT_FLUSH
+        }
+        if(isFourOfAKind()) {
+            return HandType.FOUR_OF_A_KIND
+        }
+        if(isFullHouse()) {
+            return HandType.FULL_HOUSE
+        }
+        if(isFlush()) {
+            return HandType.FLUSH
+        }
+        if(isStraight()) {
+            return HandType.STRAIGHT
+        }
+        if(isThreeOfAKind()) {
+            return HandType.THREE_OF_A_KIND
+        }
+        if(isTwoPair()) {
+            return HandType.TWO_PAIR
+        }
+        if(isPair()) {
+            return HandType.PAIR
+        }
+        return HandType.HIGH_CARD
     }
 
     protected boolean isPair() {
@@ -43,7 +75,7 @@ class Hand {
         return isSequential(values) && (suits.findAll { k, v -> v.size() == 5 }.size() == 0)
     }
 
-    boolean isSequential(List<Integer> values) {
+    protected boolean isSequential(List<Integer> values) {
         boolean isStraight = true
 
         int ACE_RANK_HIGH = 14
@@ -92,6 +124,6 @@ class Hand {
 
     @Override
     String toString() {
-        return cards.collect { it.rankStr + ' of ' + it.suit }.toString()
+        return cards.collect { it.rankStr + ' of ' + it.suit }.toString() + " ($handType)"
     }
 }

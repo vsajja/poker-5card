@@ -4,6 +4,7 @@ import jooq.generated.tables.pojos.Card
 import org.jooq.DSLContext
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL
+import org.poker.Evaluator
 import org.poker.Hand
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -81,15 +82,19 @@ ratpack {
                 byMethod {
                     post {
                         parse(jsonNode()).map { params ->
+                            log.info(params.toString())
+
                             List<Card> cardsA = getCards(params[0])
                             List<Card> cardsB = getCards(params[1])
 
                             Hand handA = new Hand(cardsA)
                             Hand handB = new Hand(cardsB)
 
-                        }.then {
-                            println "then"
-                            render "then"
+                            Evaluator evaluator = new Evaluator()
+                            def result = evaluator.evaluate(handA, handB)
+                        }.then { result ->
+                            log.info(result.toMapString())
+                            render json(result)
                         }
                     }
                 }
@@ -99,18 +104,18 @@ ratpack {
         files {
             dir 'dist'
         }
+
+
     }
 }
 
 def getCards(cardList) {
     List<Card> cards = []
     JsonSlurper slurper = new JsonSlurper()
-    if (cardList) {
-        cardList.each {
-            def cardObj = slurper.parseText(it.toString())
-            def card = new Card(cardObj.cardId, cardObj.name, cardObj.rank, cardObj.rankStr, cardObj.suit, cardObj.imageSrc)
-            cards.add(card)
-        }
+    cardList.each {
+        def cardObj = slurper.parseText(it.toString())
+        def card = new Card(cardObj.cardId, cardObj.name, cardObj.rank, cardObj.rankStr, cardObj.suit, cardObj.imageSrc)
+        cards.add(card)
     }
     return cards
 }

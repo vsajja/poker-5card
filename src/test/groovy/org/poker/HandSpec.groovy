@@ -6,12 +6,85 @@ import spock.lang.Unroll
 
 @Unroll
 public class HandSpec extends Specification {
-    def "pair: #hand"() {
+
+    def "get hand type high card: #hand"() {
+        expect:
+        hand.handType == HandType.HIGH_CARD
+
+        where:
+        hand << createHands(HandType.HIGH_CARD)
+    }
+
+    def "get hand type pair: #hand"() {
+        expect:
+        hand.handType == HandType.PAIR
+
+        where:
+        hand << createHands(HandType.PAIR)
+    }
+
+    def "get hand type two pair: #hand"() {
+        expect:
+        hand.handType == HandType.TWO_PAIR
+
+        where:
+        hand << createHands(HandType.TWO_PAIR)
+    }
+
+    def "get hand type three of a kind: #hand"() {
+        expect:
+        hand.handType == HandType.THREE_OF_A_KIND
+
+        where:
+        hand << createHands(HandType.THREE_OF_A_KIND)
+    }
+
+    def "get hand type straight: #hand"() {
+        expect:
+        hand.handType == HandType.STRAIGHT
+
+        where:
+        hand << createHands(HandType.STRAIGHT)
+    }
+
+    def "get hand type flush: #hand"() {
+        expect:
+        hand.handType == HandType.FLUSH
+
+        where:
+        hand << createHands(HandType.FLUSH)
+    }
+
+    def "get hand type full house: #hand"() {
+        expect:
+        hand.handType == HandType.FULL_HOUSE
+
+        where:
+        hand << createHands(HandType.FULL_HOUSE)
+    }
+
+    def "get hand type four of a kind: #hand"() {
+        expect:
+        hand.handType == HandType.FOUR_OF_A_KIND
+
+        where:
+        hand << createHands(HandType.FOUR_OF_A_KIND)
+    }
+
+    def "get hand type straight flush: #hand"() {
+        expect:
+        hand.handType == HandType.STRAIGHT_FLUSH
+
+        where:
+        hand << createHands(HandType.STRAIGHT_FLUSH)
+    }
+
+    def "is pair: #hand"() {
         expect:
         hand.isPair() == true
 
         where:
-        hand << createHands([HandType.PAIR])
+        hand << createHands(HandType.PAIR)
     }
 
     def "not pair: #hand"() {
@@ -27,7 +100,7 @@ public class HandSpec extends Specification {
         hand.isTwoPair() == true
 
         where:
-        hand << createHands([HandType.TWO_PAIR])
+        hand << createHands(HandType.TWO_PAIR)
     }
 
     def "not two pair: #hand"() {
@@ -43,7 +116,7 @@ public class HandSpec extends Specification {
         hand.isThreeOfAKind() == true
 
         where:
-        hand << createHands([HandType.THREE_OF_A_KIND])
+        hand << createHands(HandType.THREE_OF_A_KIND)
 
     }
 
@@ -60,7 +133,7 @@ public class HandSpec extends Specification {
         hand.isStraight() == true
 
         where:
-        hand << createHands([HandType.STRAIGHT])
+        hand << createHands(HandType.STRAIGHT)
     }
 
     def "not straight: #hand"() {
@@ -76,7 +149,7 @@ public class HandSpec extends Specification {
         hand.isFlush() == true
 
         where:
-        hand << createHands([HandType.FLUSH])
+        hand << createHands(HandType.FLUSH)
     }
 
     def "not flush: #hand"() {
@@ -92,7 +165,7 @@ public class HandSpec extends Specification {
         hand.isFullHouse() == true
 
         where:
-        hand << createHands([HandType.FULL_HOUSE])
+        hand << createHands(HandType.FULL_HOUSE)
     }
 
     def "not full house: #hand"() {
@@ -108,7 +181,7 @@ public class HandSpec extends Specification {
         hand.isFourOfAKind() == true
 
         where:
-        hand << createHands([HandType.FOUR_OF_A_KIND])
+        hand << createHands(HandType.FOUR_OF_A_KIND)
     }
 
     def "not four of a kind: #hand"() {
@@ -124,7 +197,7 @@ public class HandSpec extends Specification {
         hand.isStraightFlush() == true
 
         where:
-        hand << createHands([HandType.STRAIGHT_FLUSH])
+        hand << createHands(HandType.STRAIGHT_FLUSH)
     }
 
     def "not straight flush: #hand"() {
@@ -133,6 +206,10 @@ public class HandSpec extends Specification {
 
         where:
         hand << createHands((HandType.values() - HandType.STRAIGHT_FLUSH).toList())
+    }
+
+    List<Hand> createHands(HandType hand) {
+        return createHands([hand])
     }
 
     List<Hand> createHands(List<HandType> types) {
@@ -189,8 +266,9 @@ public class HandSpec extends Specification {
      * Creates a 5-card poker hand. @see {@link org.poker.Hand}
      * @param handStr
      * example: '2clubs 2spades 2hearts 2diamonds 3clubs'
+     * @return
      */
-    Hand createHand(handStr) {
+    Hand createHand(String handStr) {
         def suits = ['clubs',
                      'spades',
                      'hearts',
