@@ -22,19 +22,19 @@ public class Evaluator {
         int handAOrdinal = handAType.ordinal()
         int handBOrdinal = handBType.ordinal()
 
-        Hand winner = handA
+        String winner = 'Hand A'
 
         if(handAOrdinal > handBOrdinal) {
-            winner = handA
+            winner = 'Hand A'
         }
         else if(handAOrdinal < handBOrdinal) {
-            winner = handB
+            winner = 'Hand B'
         }
         else if(handAOrdinal == handBOrdinal) {
-            winner = null
+            winner = 'Draw'
         }
 
-        def result = ['winner': winner, 'handA': handA, handAType: handA.handType, 'handB': handB, 'handBType': handB.handType]
+        def result = ['winner': winner, 'handA': handA.toString(), 'handB': handB.toString() ]
 
         return result
     }

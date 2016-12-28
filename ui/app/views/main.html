@@ -6,7 +6,13 @@
   <div class="col-sm-10">
     <div class="col-sm-6">
       <div class="panel panel-default" ng-click="selectHand(handA)" ng-class="handAClass">
-        <div class="panel-heading"><strong>Hand A</strong></div>
+        <div class="panel-heading">
+          <strong>Hand A</strong>
+          <button style="float: right" ng-click="randomHand(handA)">
+            Random
+            <i class="fa fa-random fa-1x" aria-hidden="true" ></i>
+          </button>
+        </div>
         <div class="panel-body">
           <table>
             <tr align="center">
@@ -15,7 +21,7 @@
                 ng-repeat="card in handA"
                 height="102px"
                 width="70px"
-                ng-src="{{card.imageSrc}}"
+                src="{{card.imageSrc}}"
                 ng-click="removeCard(handA, card)"/>
               </td>
             </tr>
@@ -26,7 +32,14 @@
 
     <div class="col-sm-6">
       <div class="panel panel-default" ng-click="selectHand(handB)" ng-class="handBClass">
-        <div class="panel-heading"><strong>Hand B</strong></div>
+        <div class="panel-heading">
+          <strong>Hand B</strong>
+          <button style="float: right" ng-click="randomHand(handB)">
+            Random
+            <i class="fa fa-random fa-1x" aria-hidden="true" ></i>
+          </button>
+        </div>
+
         <div class="panel-body">
           <table>
             <tr align="center">
@@ -35,7 +48,7 @@
                 ng-repeat="card in handB"
                 height="102px"
                 width="70px"
-                ng-src="{{card.imageSrc}}"
+                src="{{card.imageSrc}}"
                 ng-click="removeCard(handB, card)"/>
               </td>
             </tr>
@@ -45,10 +58,18 @@
     </div>
 
     <div class="col-sm-12">
-      <button ng-click="compareHands(handA, handB)">Compare</button>
-
-      <br/>
-      <br/>
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <button ng-click="compareHands(handA, handB)">Compare</button>
+        </div>
+        <div class="panel-body">
+          <div>
+            <h3><i class="fa fa-trophy" aria-hidden="true"></i> {{result.winner}} </h3>
+            <h5><strong>Hand A</strong> {{result.handA}}</h5>
+            <h5><strong>Hand B</strong> {{result.handB}}</h5>
+          </div>
+        </div>
+      </div>
 
       <div class="panel panel-default">
         <div class="panel-heading"><strong>Select Cards</strong></div>
@@ -60,7 +81,7 @@
                   ng-repeat="card in cards"
                   height="102px"
                   width="70px"
-                  ng-src="{{card.imageSrc}}"
+                  src="{{card.imageSrc}}"
                   ng-model="card"
                   ng-click="addCard(card)"
                 />

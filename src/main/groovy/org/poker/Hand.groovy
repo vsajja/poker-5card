@@ -124,6 +124,6 @@ public class Hand {
 
     @Override
     String toString() {
-        return cards.collect { it.rankStr + ' of ' + it.suit }.toString() + " ($handType)"
+        return "$handType " + cards.collect { it.rankStr + ' of ' + it.suit }.toString()
     }
 }

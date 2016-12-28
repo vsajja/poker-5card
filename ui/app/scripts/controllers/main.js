@@ -41,6 +41,20 @@ angular.module('pokerApp')
       }
     };
 
+    $scope.randomHand = function (hand) {
+      $scope.hand = [];
+
+      var random = Restangular.all('random');
+      random.customGET().then(function (cards) {
+        if (hand === $scope.handA) {
+          $scope.handA = cards;
+        }
+        else if (hand === $scope.handB) {
+          $scope.handB = cards;
+        }
+      });
+    };
+
     $scope.addCard = function (card) {
       var hand = $scope.selectedHand;
       if (hand.length < 5) {

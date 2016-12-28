@@ -73,6 +73,24 @@ ratpack {
                                 .orderBy(CARD.RANK.asc())
                                 .fetch()
                                 .into(Card.class)
+
+                        render json(cards)
+                    }
+                }
+            }
+
+            path('random') {
+                byMethod {
+                    get {
+                        DataSource dataSource = registry.get(DataSource.class)
+                        DSLContext context = DSL.using(dataSource, SQLDialect.POSTGRES)
+
+                        List<Card> cards = context.selectFrom(CARD)
+                                .orderBy(DSL.rand())
+                                .limit(5)
+                                .fetch()
+                                .into(Card.class)
+
                         render json(cards)
                     }
                 }
@@ -93,7 +111,6 @@ ratpack {
                             Evaluator evaluator = new Evaluator()
                             def result = evaluator.evaluate(handA, handB)
                         }.then { result ->
-                            log.info(result.toMapString())
                             render json(result)
                         }
                     }
@@ -104,8 +121,6 @@ ratpack {
         files {
             dir 'dist'
         }
-
-
     }
 }
 
